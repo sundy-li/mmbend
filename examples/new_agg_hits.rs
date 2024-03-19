@@ -1,7 +1,5 @@
-mod cmp;
-mod result;
-
-use crate::result::Result;
+use mmbend::cmp;
+use mmbend::result::Result;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -10,7 +8,7 @@ async fn main() -> Result<()> {
 }
 
 mod hits {
-    use crate::cmp;
+    use mmbend::cmp;
 
     pub struct Query {}
 
