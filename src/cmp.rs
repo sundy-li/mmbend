@@ -18,22 +18,21 @@ pub async fn run_compare<C: Comparator>(dsn: &str) -> Result<()> {
     let client = Client::new(dsn.to_string());
     let conn = client.get_conn().await.unwrap();
 
+    let mut q = 1;
+
     loop {
         let sql = C::random_sql();
-
-        print!("Running: {sql}. ");
-
+        print!("Q{q}: {sql}\n");
         for s in C::prepare_a() {
             let _ = conn.exec(&s).await?;
         }
-        let value_a = conn.query_all(&sql).await?;
 
+        let value_a = conn.query_all(&sql).await?;
         for s in C::prepare_b() {
             let _ = conn.exec(&s).await?;
         }
 
         let value_b = conn.query_all(&sql).await?;
-
         let a = value_a
             .into_iter()
             .map(|c| {
@@ -77,6 +76,11 @@ pub async fn run_compare<C: Comparator>(dsn: &str) -> Result<()> {
         } else {
             println!(" {}", Style::new().on_green().apply_to("PASS"));
         }
+        println!(
+            "-----------------------------------------------------------------------------------------------------------------------------------"
+        );
+
+        q += 1;
     }
     Ok(())
 }

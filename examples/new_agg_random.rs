@@ -26,6 +26,9 @@ use mmbend::result::Result;
 // insert into test_agg select * from test_agg_random limit 78888;
 // insert into test_agg select * from test_agg_random limit 88888;
 // insert into test_agg select * from test_agg_random limit 98888;
+// insert into test_agg select * from test_agg;
+// insert into test_agg select * from test_agg;
+// insert into test_agg select * from test_agg;
 
 #[tokio::main]
 async fn main() -> Result<()> {
