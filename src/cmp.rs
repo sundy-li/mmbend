@@ -31,7 +31,7 @@ pub async fn run_compare<C: Comparator>(c: &mut C, dsn: &str) -> Result<()> {
             break;
         }
         let sql = sql.unwrap();
-        print!("Q{q}: {sql}\n");
+        print!("Query #{q}:\n {sql}\n");
         for s in c.a_prepare_sqls() {
             let _ = conn.exec(&s).await?;
         }

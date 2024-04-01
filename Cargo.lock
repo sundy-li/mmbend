@@ -1102,6 +1102,7 @@ dependencies = [
  "rand",
  "similar",
  "tokio",
+ "tokio-stream",
 ]
 
 [[package]]
