@@ -4,7 +4,7 @@ use mmbend::result::Result;
 #[tokio::main]
 async fn main() -> Result<()> {
     let dsn = "databend://root:@localhost:8000/default?sslmode=disable".to_string();
-    cmp::run_compare::<hits::Query>(&dsn).await
+    cmp::run_compare(&mut hits::Query {}, &dsn).await
 }
 
 mod hits {
@@ -13,17 +13,14 @@ mod hits {
     pub struct Query {}
 
     impl cmp::Comparator for Query {
-        fn a_prepare_sqls() -> Vec<String> {
+        fn a_prepare_sqls(&self) -> Vec<String> {
             vec!["set enable_experimental_aggregate_hashtable = 0".to_string()]
         }
-        fn b_prepare_sqls() -> Vec<String> {
+        fn b_prepare_sqls(&self) -> Vec<String> {
             vec!["set enable_experimental_aggregate_hashtable = 1".to_string()]
         }
 
-        fn random_sql() -> String {
-            
-            
-
+        fn next_sql(&mut self) -> Option<String> {
             let str_cols: Vec<&'static str> = vec![
                 "title",
                 "url",
@@ -75,7 +72,7 @@ mod hits {
                 "default.hits".to_string(),
             );
 
-            gen.generate(1..3, 2..4)
+            Some(gen.generate(1..3, 2..4))
         }
     }
 }
