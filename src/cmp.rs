@@ -3,12 +3,17 @@ use console::Style;
 
 use similar::{ChangeTag, TextDiff};
 
+// Comparator is a trait that defines the behavior of a custom comparator.
 pub trait Comparator {
     fn random_sql() -> String;
-    fn prepare_a() -> Vec<String> {
+
+    // a_prepare_sqls returns a list of SQLs that should be executed before running the query for A.
+    fn a_prepare_sqls() -> Vec<String> {
         vec![]
     }
-    fn prepare_b() -> Vec<String> {
+
+    // b_prepare_sqls returns a list of SQLs that should be executed before running the query for B.
+    fn b_prepare_sqls() -> Vec<String> {
         vec![]
     }
 }
@@ -23,12 +28,12 @@ pub async fn run_compare<C: Comparator>(dsn: &str) -> Result<()> {
     loop {
         let sql = C::random_sql();
         print!("Q{q}: {sql}\n");
-        for s in C::prepare_a() {
+        for s in C::a_prepare_sqls() {
             let _ = conn.exec(&s).await?;
         }
 
         let value_a = conn.query_all(&sql).await?;
-        for s in C::prepare_b() {
+        for s in C::b_prepare_sqls() {
             let _ = conn.exec(&s).await?;
         }
 

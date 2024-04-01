@@ -37,15 +37,15 @@ async fn main() -> Result<()> {
 }
 
 mod hits {
-    use mmbend::cmp;
+    use mmbend::{cmp, generator};
 
     pub struct Query {}
 
     impl cmp::Comparator for Query {
-        fn prepare_a() -> Vec<String> {
+        fn a_prepare_sqls() -> Vec<String> {
             vec!["set enable_experimental_aggregate_hashtable = 0".to_string()]
         }
-        fn prepare_b() -> Vec<String> {
+        fn b_prepare_sqls() -> Vec<String> {
             vec!["set enable_experimental_aggregate_hashtable = 1".to_string()]
         }
 
@@ -55,41 +55,15 @@ mod hits {
 
             let str_cols: Vec<&'static str> = vec!["b", "h", "i", "j", "f", "g"];
             let int_cols: Vec<&'static str> = vec!["a", "c", "d", "e"];
+
             let unsorted_cols: Vec<&'static str> = vec!["i", "h"];
-
-            let mut rng = rand::thread_rng();
-
-            let r = 2..=4;
-            // pick 2-3 group fileds
-            let group_num: u64 = rng.gen_range(r);
-            let dims = str_cols
-                .iter()
-                .chain(int_cols.iter())
-                .map(|c| c.to_string())
-                .choose_multiple(&mut rng, group_num as _);
-
-            // pick 3 min, max, avg, distinct fields
-            let aggrs = int_cols
-                .iter()
-                .map(|c| c.to_string())
-                .choose_multiple(&mut rng, 3);
-
-            let dim_cols = dims.join(", ");
-            let sorted_cols: Vec<String> = dims
-                .iter()
-                .filter(|x| !unsorted_cols.contains(&x.as_str()))
-                .map(|x| x.to_string())
-                .chain(["x", "y", "z"].iter().map(|x| x.to_string()))
-                .collect();
-
-            format!(
-            "SELECT {}, min({}) x, max({}) y, avg({}) z FROM default.test_agg GROUP BY ALL ORDER BY {} LIMIT 10",
-            dim_cols,
-            aggrs[0],
-            aggrs[1],
-            aggrs[2],
-            sorted_cols.join(" ,"),
-        )
+            let mut gen = generator::Generator::new(
+                str_cols.iter().map(|x| x.to_string()).collect(),
+                int_cols.iter().map(|x| x.to_string()).collect(),
+                "default.test_agg".to_string(),
+            );
+            gen.set_unsorted_fields(unsorted_cols.iter().map(|x| x.to_string()).collect());
+            gen.generate(1..3, 1..3)
         }
     }
 }

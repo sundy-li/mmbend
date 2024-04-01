@@ -8,15 +8,15 @@ async fn main() -> Result<()> {
 }
 
 mod hits {
-    use mmbend::cmp;
+    use mmbend::{cmp, generator};
 
     pub struct Query {}
 
     impl cmp::Comparator for Query {
-        fn prepare_a() -> Vec<String> {
+        fn a_prepare_sqls() -> Vec<String> {
             vec!["set enable_experimental_aggregate_hashtable = 0".to_string()]
         }
-        fn prepare_b() -> Vec<String> {
+        fn b_prepare_sqls() -> Vec<String> {
             vec!["set enable_experimental_aggregate_hashtable = 1".to_string()]
         }
 
@@ -69,33 +69,13 @@ mod hits {
                 "flashminor",
             ];
 
-            let mut rng = rand::thread_rng();
+            let gen = generator::Generator::new(
+                str_cols.iter().map(|x| x.to_string()).collect(),
+                int_cols.iter().map(|x| x.to_string()).collect(),
+                "default.hits".to_string(),
+            );
 
-            let r = 1..=2;
-            // pick 2-3 group fileds
-            let group_num: u64 = rng.gen_range(r);
-            let dims = str_cols
-                .iter()
-                .chain(int_cols.iter())
-                .map(|c| c.to_string())
-                .choose_multiple(&mut rng, group_num as _);
-
-            // pick 3 min, max, avg, distinct fields
-            let aggrs = int_cols
-                .iter()
-                .map(|c| c.to_string())
-                .choose_multiple(&mut rng, 3);
-
-            let dim_cols = dims.join(", ");
-
-            format!(
-            "SELECT {}, min({}), max({}), avg({}) FROM default.hits GROUP BY ALL ORDER BY {} LIMIT 10",
-            dim_cols,
-            aggrs[0],
-            aggrs[1],
-            aggrs[2],
-            dim_cols,
-        )
+            gen.generate(1..=2, 2..3)
         }
     }
 }
