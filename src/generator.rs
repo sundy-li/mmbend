@@ -39,7 +39,7 @@ impl Generator {
         let mut rng = rand::thread_rng();
         let mut query = String::new();
 
-        let n = rng.gen_range::<usize, _>(groups.clone()).min(1);
+        let n = rng.gen_range::<usize, _>(groups.clone()).max(1);
         let group_cols = self
             .fields
             .iter()
@@ -47,7 +47,7 @@ impl Generator {
             .cloned()
             .choose_multiple(&mut rng, n);
 
-        let n = rng.gen_range::<usize, _>(aggrs.clone()).min(1);
+        let n = rng.gen_range::<usize, _>(aggrs.clone()).max(1);
         let aggrs_cols = self.fields.iter().cloned().choose_multiple(&mut rng, n);
 
         query.push_str("SELECT ");

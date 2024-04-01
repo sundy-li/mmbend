@@ -21,8 +21,8 @@ mod hits {
         }
 
         fn random_sql() -> String {
-            use rand::seq::IteratorRandom;
-            use rand::Rng;
+            
+            
 
             let str_cols: Vec<&'static str> = vec![
                 "title",
@@ -75,7 +75,7 @@ mod hits {
                 "default.hits".to_string(),
             );
 
-            gen.generate(1..=2, 2..3)
+            gen.generate(1..3, 2..4)
         }
     }
 }

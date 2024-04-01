@@ -50,9 +50,6 @@ mod hits {
         }
 
         fn random_sql() -> String {
-            use rand::seq::IteratorRandom;
-            use rand::Rng;
-
             let str_cols: Vec<&'static str> = vec!["b", "h", "i", "j", "f", "g"];
             let int_cols: Vec<&'static str> = vec!["a", "c", "d", "e"];
 
