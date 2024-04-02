@@ -19,6 +19,14 @@ pub trait Perf {
     fn result_type(&self) -> ResultType {
         ResultType::Best
     }
+
+    fn output(&self, q: usize, ms: u64) -> String {
+        format!(
+            "{}: {}",
+            Style::new().bold().apply_to(format!("Query #{}", q)),
+            Style::new().green().apply_to(format!("{:?}ms", ms))
+        )
+    }
 }
 
 /// How to caculate the result
@@ -58,32 +66,13 @@ pub async fn run_perf<P: Perf>(p: &mut P, dsn: &str) -> Result<()> {
             // assert!(result[i] > 0, "result[i] should be greater than 0");
         }
         result.sort();
-        match p.result_type() {
-            ResultType::Best => {
-                let best = result.iter().min().unwrap();
-                println!(
-                    "{}: {}",
-                    Style::new().bold().apply_to(format!("Query #{}", q)),
-                    Style::new().green().apply_to(format!("{:?}ms", best))
-                );
-            }
-            ResultType::Median => {
-                let median = result[result.len() / 2];
-                println!(
-                    "{}: {}",
-                    Style::new().bold().apply_to(format!("Query #{}", q)),
-                    Style::new().green().apply_to(format!("{:?}ms", median))
-                );
-            }
-            ResultType::Avg => {
-                let avg = result.iter().sum::<u64>() / result.len() as u64;
-                println!(
-                    "{}: {}",
-                    Style::new().bold().apply_to(format!("Query #{}", q)),
-                    Style::new().green().apply_to(format!("{:?}ms", avg))
-                );
-            }
-        }
+        let ms = match p.result_type() {
+            ResultType::Best => *result.iter().min().unwrap(),
+            ResultType::Median => result[result.len() / 2],
+            ResultType::Avg => result.iter().sum::<u64>() / result.len() as u64,
+        };
+
+        println!("{}", p.output(q, ms));
         q += 1;
     }
     Ok(())
