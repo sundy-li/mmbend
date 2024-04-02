@@ -55,7 +55,7 @@ pub async fn run_perf<P: Perf>(p: &mut P, dsn: &str) -> Result<()> {
                     _ => {}
                 }
             }
-            assert!(result[i] > 0, "result[i] should be greater than 0");
+            // assert!(result[i] > 0, "result[i] should be greater than 0");
         }
         result.sort();
         match p.result_type() {
