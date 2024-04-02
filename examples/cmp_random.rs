@@ -32,8 +32,8 @@ use mmbend::result::Result;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let dsn = "databend://root:@localhost:8000/default?sslmode=disable".to_string();
-    cmp::run_compare(&mut test_agg::Query {}, &dsn).await
+    let dsn = "databend://root:@localhost:8000/default?sslmode=disable";
+    cmp::run_compare(&mut test_agg::Query {}, dsn, dsn).await
 }
 
 mod test_agg {

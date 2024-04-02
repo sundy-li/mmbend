@@ -18,10 +18,13 @@ pub trait Comparator {
     }
 }
 
-pub async fn run_compare<C: Comparator>(c: &mut C, dsn: &str) -> Result<()> {
+pub async fn run_compare<C: Comparator>(c: &mut C, dsn_a: &str, dsn_b: &str) -> Result<()> {
     use databend_driver::Client;
-    let client = Client::new(dsn.to_string());
-    let conn = client.get_conn().await.unwrap();
+    let client = Client::new(dsn_a.to_string());
+    let conn_a = client.get_conn().await.unwrap();
+
+    let client = Client::new(dsn_b.to_string());
+    let conn_b = client.get_conn().await.unwrap();
 
     let mut q = 1;
 
@@ -33,15 +36,15 @@ pub async fn run_compare<C: Comparator>(c: &mut C, dsn: &str) -> Result<()> {
         let sql = sql.unwrap();
         print!("Query #{q}:\n {sql}\n");
         for s in c.a_prepare_sqls() {
-            let _ = conn.exec(&s).await?;
+            let _ = conn_a.exec(&s).await?;
         }
 
-        let value_a = conn.query_all(&sql).await?;
+        let value_a = conn_a.query_all(&sql).await?;
         for s in c.b_prepare_sqls() {
-            let _ = conn.exec(&s).await?;
+            let _ = conn_b.exec(&s).await?;
         }
 
-        let value_b = conn.query_all(&sql).await?;
+        let value_b = conn_b.query_all(&sql).await?;
         let a = value_a
             .into_iter()
             .map(|c| {

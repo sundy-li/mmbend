@@ -3,9 +3,9 @@ use mmbend::result::Result;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let dsn = "databend://root:@localhost:8000/default?sslmode=disable".to_string();
+    let dsn = "databend://root:@localhost:8000/default?sslmode=disable";
     let file_or_path = "./target/*.sql";
-    cmp::run_compare(&mut sql_files::Query::from_path(file_or_path), &dsn).await
+    cmp::run_compare(&mut sql_files::Query::from_path(file_or_path), dsn, dsn).await
 }
 
 mod sql_files {
