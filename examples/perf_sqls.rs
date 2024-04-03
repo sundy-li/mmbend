@@ -3,8 +3,8 @@ use mmbend::{perf, result::Result};
 #[tokio::main]
 async fn main() -> Result<()> {
     let dsn = "databend://root:@localhost:8000/default?sslmode=disable".to_string();
-    let file_or_path = "./target/*.sql";
-    perf::run_perf(&mut sql_files::Query::from_path(file_or_path), &dsn).await
+    let blob_files = "./data/simple.sql";
+    perf::run_perf(&mut sql_files::Query::from_path(blob_files), &dsn).await
 }
 
 mod sql_files {
@@ -28,12 +28,24 @@ mod sql_files {
                         if path.is_file() {
                             let file = std::fs::File::open(path).unwrap();
                             let reader = std::io::BufReader::new(file);
+
+                            let mut sql = String::new();
                             for line in reader.lines() {
                                 let line = line.unwrap(); // In real code, handle errors properly
                                 if line.trim().is_empty() {
                                     continue;
                                 }
-                                sqls.push(line.trim().to_string());
+                                if line.trim().ends_with(";") {
+                                    sql.push('\n');
+                                    sql.push_str(&line);
+                                    sqls.push(sql.trim().trim_end_matches(';').to_string());
+                                    sql = String::new();
+                                } else {
+                                    sql.push_str(&line);
+                                }
+                            }
+                            if sql.trim().len() > 0 {
+                                sqls.push(sql.trim().to_string());
                             }
                         }
                     }
